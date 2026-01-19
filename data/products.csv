@@ -1,0 +1,13 @@
+product_id,name,category,cost,price
+101,Portland Cement 50lb,Structural,5.0,8.5
+102,Red Clay Brick,Structural,0.5,0.85
+103,Rebar 1/2 inch,Structural,6.0,9.5
+104,Construction Sand 1 ton,Structural,25.0,40.0
+105,Hammer Drill 700W,Tools,45.0,79.99
+106,"Angle Grinder 4.5""",Tools,30.0,55.0
+107,Screwdriver Set Pro,Tools,15.0,24.99
+108,Claw Hammer,Tools,8.0,14.5
+109,White Enamel Paint 1gal,Finishing,20.0,35.0
+110,Grey Floor Tiles Box,Finishing,12.0,19.99
+111,Waterproof Grout,Finishing,4.0,7.5
+112,Paint Brush 2 inch,Finishing,2.0,4.5

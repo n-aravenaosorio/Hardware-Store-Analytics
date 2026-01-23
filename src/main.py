@@ -27,7 +27,7 @@ def main():
     )
 
     # --- ACTION BUTTON ---
-    if st.sidebar.button("🚀 RUN SIMULATION", type="primary"):
+    if st.sidebar.button("RUN SIMULATION", type="primary"):
         with st.spinner("Simulating Market Scenarios... Writing to SQL Database..."):
             # I call the ETL function with the user's parameters
             count = etl.generate_simulation(demand_factor=demand, price_increase=inflation)

@@ -19,18 +19,22 @@ def main():
     )
     
     # Parameter 2: Inflation
-    inflation = st.sidebar.slider(
+    # I changed the slider to use Integers (0 to 50) so the display looks correct (e.g. 10%)
+    inflation_pct = st.sidebar.slider(
         "Price Inflation Shock", 
-        min_value=0.0, max_value=0.5, value=0.0, step=0.05,
+        min_value=0, max_value=50, value=0, step=5,
         format="%d%%",
         help="Increase base prices by this percentage."
     )
+    
+    # I convert the integer back to decimal for the calculation (e.g., 10 becomes 0.10)
+    inflation_decimal = inflation_pct / 100.0
 
     # --- ACTION BUTTON ---
     if st.sidebar.button("RUN SIMULATION", type="primary"):
         with st.spinner("Simulating Market Scenarios... Writing to SQL Database..."):
-            # I call the ETL function with the user's parameters
-            count = etl.generate_simulation(demand_factor=demand, price_increase=inflation)
+            # I call the ETL function with the decimal value
+            count = etl.generate_simulation(demand_factor=demand, price_increase=inflation_decimal)
             st.success(f"Simulation Complete! Generated {count} transactions in 'hardware_store.db'")
 
     st.markdown("---")

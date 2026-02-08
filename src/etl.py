@@ -71,22 +71,25 @@ def generate_simulation(demand_factor=1.0, price_increase=0.0):
 
     for _ in range(total_transactions):
         date = start_date + timedelta(days=random.randint(0, days_range))
-        is_b2b = random.random() < 0.3
         
+        # ELIMINAMOS la restricción del 30%. Ahora siempre asignamos un cliente.
         prod_id = random.choice(product_ids)
         qty = random.randint(1, 20)
         
-        # I get the price (already inflated if applicable)
         unit_price = df_products.loc[df_products['product_id'] == prod_id, 'price'].values[0]
         total = round(qty * unit_price, 2)
         
-        client = random.choice(client_ids) if is_b2b else None
-        doc_type = 'Invoice' if is_b2b else 'Receipt'
+        # --- CAMBIO CLAVE AQUÍ ---
+        # Asignamos un cliente real a TODAS las transacciones
+        client = random.choice(client_ids) 
+        
+        # Mantenemos la variedad de documentos solo por estética
+        doc_type = random.choice(['Invoice', 'Receipt'])
 
         transactions.append({
-            'date': date, # Use datetime object for SQL
+            'date': date, 
             'type': doc_type,
-            'client_id': client,
+            'client_id': client,  # Ahora esto NUNCA será None
             'product_id': prod_id,
             'quantity': qty,
             'total_amount': total

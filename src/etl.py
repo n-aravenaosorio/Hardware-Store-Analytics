@@ -3,7 +3,7 @@ import numpy as np
 from faker import Faker
 import random
 from datetime import datetime, timedelta
-import database  # I import my new database module
+import database  # Importa tu módulo de base de datos local
 
 fake = Faker('en_US')
 Faker.seed(42)
@@ -11,14 +11,14 @@ np.random.seed(42)
 
 def generate_simulation(demand_factor=1.0, price_increase=0.0):
     """
-    I generate the simulation accepting parameters:
-    - demand_factor: Multiplier for transaction volume (1.0 = normal, 0.5 = crisis)
-    - price_increase: Percentage added to base prices (0.10 = 10% inflation)
+    Genera la simulación aceptando parámetros:
+    - demand_factor: Multiplicador de volumen de transacciones
+    - price_increase: Porcentaje de aumento de precios
     """
-    print(f"--- Starting Simulation (Demand: {demand_factor}x, Price Shock: +{price_increase:.0%}) ---")
+    print(f"--- Iniciando Simulación (Demanda: {demand_factor}x, Shock de Precios: +{price_increase:.0%}) ---")
 
-    # 1. PRODUCTS
-    print("1. Generating Product Catalog...")
+    # 1. PRODUCTOS
+    print("1. Generando Catálogo de Productos...")
     products_data = [
         (101, 'Portland Cement 50lb', 'Structural', 5.00, 8.50),
         (102, 'Red Clay Brick', 'Structural', 0.50, 0.85),
@@ -36,14 +36,14 @@ def generate_simulation(demand_factor=1.0, price_increase=0.0):
     
     df_products = pd.DataFrame(products_data, columns=['product_id', 'name', 'category', 'cost', 'price'])
     
-    # I apply the price shock simulation
+    # Aplicar simulación de precios
     df_products['price'] = df_products['price'] * (1 + price_increase)
     
-    # I save to SQL instead of CSV
+    # Guardar en SQL
     database.save_to_sql(df_products, 'products')
 
-    # 2. CUSTOMERS
-    print("2. Generating B2B Customers...")
+    # 2. CLIENTES (B2B)
+    print("2. Generando Clientes B2B...")
     b2b_clients = []
     for _ in range(50):
         b2b_clients.append({
@@ -55,41 +55,43 @@ def generate_simulation(demand_factor=1.0, price_increase=0.0):
     df_b2b = pd.DataFrame(b2b_clients)
     database.save_to_sql(df_b2b, 'customers')
 
-    # 3. TRANSACTIONS
-    print("3. Generating Transactions...")
+    # 3. TRANSACCIONES
+    print("3. Generando Transacciones...")
     transactions = []
     start_date = datetime(2024, 1, 1)
     end_date = datetime(2025, 12, 31)
     days_range = (end_date - start_date).days
     
+    # Obtener lista de IDs válidos para asegurar la relación
     client_ids = df_b2b['client_id'].tolist()
     product_ids = df_products['product_id'].tolist()
     
-    # I calculate total transactions based on the demand factor
     base_transactions = 5000
     total_transactions = int(base_transactions * demand_factor)
 
     for _ in range(total_transactions):
         date = start_date + timedelta(days=random.randint(0, days_range))
         
-        # ELIMINAMOS la restricción del 30%. Ahora siempre asignamos un cliente.
+        # Selección de producto
         prod_id = random.choice(product_ids)
         qty = random.randint(1, 20)
         
+        # Precio unitario
         unit_price = df_products.loc[df_products['product_id'] == prod_id, 'price'].values[0]
         total = round(qty * unit_price, 2)
         
-        # --- CAMBIO CLAVE AQUÍ ---
-        # Asignamos un cliente real a TODAS las transacciones
-        client = random.choice(client_ids) 
+        # --- CORRECCIÓN AQUÍ ---
+        # Siempre asignamos un cliente de la lista existente
+        # Esto evita los valores NULL y arregla la relación en Power BI
+        client = random.choice(client_ids)
         
-        # Mantenemos la variedad de documentos solo por estética
+        # Mantenemos la variedad de tipo de documento
         doc_type = random.choice(['Invoice', 'Receipt'])
 
         transactions.append({
-            'date': date, 
+            'date': date,
             'type': doc_type,
-            'client_id': client,  # Ahora esto NUNCA será None
+            'client_id': client, # Nunca será None
             'product_id': prod_id,
             'quantity': qty,
             'total_amount': total
@@ -99,7 +101,7 @@ def generate_simulation(demand_factor=1.0, price_increase=0.0):
     df_trans = df_trans.sort_values('date')
     database.save_to_sql(df_trans, 'transactions')
     
-    print("--- Simulation Completed and Saved to SQL ---")
+    print("--- Simulación Completada y Guardada en SQL ---")
     return len(df_trans)
 
 if __name__ == "__main__":
